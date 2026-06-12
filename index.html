@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vibe Render — Renders de Cinema com IA</title>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2428536680685666');fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=2428536680685666&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#faf8f4;--bg2:#f0ede6;--bg3:#e8e4dc;
+--dark:#0c0c0e;--dark2:#1a1a1e;--dark3:#2a2a30;
+--coral:#e8553d;--coral-d:#d04530;--coral-light:#fef0ed;
+--gold:#c49a3c;--gold-light:#fdf6e8;
+--text:#0c0c0e;--text2:#4a4a55;--text3:#8a8a95;
+--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.12);
+--serif:'Playfair Display',Georgia,serif;
+--sans:'Instrument Sans',system-ui,sans-serif;
+--mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+img,video{display:block;max-width:100%}
+.ctn{max-width:1100px;margin:0 auto;padding:0 28px}
+.ctn-n{max-width:720px;margin:0 auto;padding:0 28px}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
+
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--dark);padding:7px 0}
+.topbar-inner{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:nowrap;text-align:center}
+.topbar-text{font-size:12px;color:rgba(255,255,255,.82);font-weight:500;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-text b{color:#fff;font-weight:700}
+.topbar-text .old{color:rgba(255,255,255,.45);text-decoration:line-through;font-weight:500}
+.topbar-text .hl{color:var(--coral);font-weight:800}
+.topbar-btn{background:var(--coral);color:#fff;padding:6px 14px;border-radius:6px;font-weight:800;font-size:11px;letter-spacing:.4px;transition:all .2s;text-transform:uppercase;white-space:nowrap;box-shadow:0 4px 14px rgba(232,85,61,.4);flex-shrink:0}
+.topbar-btn:hover{background:var(--coral-d);transform:translateY(-1px)}
+.tb-sep,.tb-ds{display:none}
+@media(max-width:760px){.topbar-text .tb-x2{display:none}}
+@media(max-width:640px){
+.topbar-text{font-size:11px;overflow:visible}
+.topbar-text .tb-x,.topbar-text .tb-of,.topbar-text .tb-dl{display:none}
+.topbar-text .tb-ds,.topbar-text .tb-sep{display:inline}
+.topbar-btn{padding:6px 11px;font-size:10px}
+.topbar-inner{gap:10px}
+}
+
+/* LOGO */
+.vr-logo{display:inline-flex;align-items:center;gap:12px}
+.vr-logo-mark{width:40px;height:40px;border-radius:12px;background:var(--coral);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(232,85,61,.25)}
+.vr-logo-mark svg{width:22px;height:22px}
+.vr-logo-type{font-family:var(--serif);font-size:22px;font-weight:900;letter-spacing:-1px;color:var(--dark)}
+.vr-logo-type span{color:var(--coral)}
+
+/* HERO */
+.hero{padding:104px 0 56px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-bg-img{position:absolute;inset:0;background:linear-gradient(160deg,var(--bg) 40%,var(--bg2) 100%)}
+.hero-circle{position:absolute;border-radius:50%;border:1px solid var(--border)}
+.hero-circle.c1{width:800px;height:800px;top:-200px;right:-200px;animation:spin 60s linear infinite}
+.hero-circle.c2{width:600px;height:600px;top:-100px;right:-100px;animation:spin 45s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,0,0,.04) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(ellipse 60% 50% at 30% 50%,black,transparent)}
+.hero-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center}
+.hero-logo{margin-bottom:20px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:var(--coral-light);border:1px solid rgba(232,85,61,.15);border-radius:100px;padding:6px 16px;font-size:12px;color:var(--coral);font-weight:600;margin-bottom:30px;text-transform:uppercase;letter-spacing:1px}
+.hero h1{font-family:var(--serif);font-size:clamp(30px,4vw,48px);font-weight:900;line-height:1.12;margin:0 0 18px;letter-spacing:-1.5px;color:var(--dark)}
+.hero h1 em{font-style:italic;color:var(--coral)}
+.hero-sub{font-size:16px;color:var(--text2);max-width:620px;line-height:1.7;margin:0 auto 30px}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.hero-micro{font-size:13px;color:var(--text3)}
+.hero-micro strong{color:var(--text2)}
+
+/* BUTTONS */
+.btn-coral{display:inline-block;background:var(--coral);color:#fff;padding:16px 36px;border-radius:12px;font-weight:800;font-size:16px;transition:all .3s;border:none;cursor:pointer;font-family:var(--sans);letter-spacing:-.2px;box-shadow:0 8px 24px rgba(232,85,61,.28);text-align:center}
+.btn-coral:hover{background:var(--coral-d);transform:translateY(-3px);box-shadow:0 16px 40px rgba(232,85,61,.4)}
+.btn-outline{display:inline-block;background:transparent;color:var(--dark);padding:16px 32px;border-radius:12px;font-weight:600;font-size:16px;border:1.5px solid var(--border2);transition:all .3s;cursor:pointer;font-family:var(--sans)}
+.btn-outline:hover{border-color:var(--coral);color:var(--coral)}
+@keyframes cta-pulse{0%,100%{box-shadow:0 8px 24px rgba(232,85,61,.3)}50%{box-shadow:0 8px 34px rgba(232,85,61,.65)}}
+.pulse{animation:cta-pulse 1.8s ease-in-out infinite}
+
+/* HERO VISUAL — workflow timeline em destaque (mídias 4:5, sem crop) */
+.wf{display:flex;align-items:center;justify-content:center;width:100%;max-width:880px;margin:6px auto 44px}
+.wf-step{position:relative;flex:1;aspect-ratio:4/5;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.18);background:#111}
+.wf-step.t1{transform:rotate(-2.5deg) translateY(12px)}
+.wf-step.t3{transform:rotate(2.5deg) translateY(12px)}
+.wf-step.t2{transform:scale(1.07);z-index:2;box-shadow:0 34px 80px rgba(0,0,0,.26)}
+.wf-step img,.wf-step video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wf-step::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,10,.6) 0%,transparent 38%)}
+.wf-chip{position:absolute;left:14px;right:12px;bottom:13px;z-index:2;display:flex;align-items:center;gap:9px;text-align:left}
+.wf-chip .num{width:24px;height:24px;border-radius:50%;background:var(--coral);color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wf-chip .txt{font-size:13.5px;font-weight:700;color:#fff;letter-spacing:.2px;line-height:1.3;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.wf-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:54px;height:54px;border-radius:50%;background:var(--coral);color:#fff;margin:0 -27px;z-index:3;flex-shrink:0;box-shadow:0 10px 26px rgba(232,85,61,.45);border:3px solid var(--bg)}
+.wf-link svg{width:17px;height:17px;stroke:#fff;transform:rotate(-90deg)}
+.wf-link span{font-family:var(--mono);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;line-height:1}
+/* before/after slider (módulo 1) */
+.ba{position:absolute;inset:0;overflow:hidden;user-select:none;touch-action:none}
+.ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.ba .after-wrap{position:absolute;inset:0;clip-path:inset(0 0 0 50%)}
+.ba .ba-handle{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#fff;transform:translateX(-1px);z-index:3;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.ba .ba-knob{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:4;cursor:ew-resize;font-size:13px;color:var(--dark)}
+.ba-tag{position:absolute;top:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:5px 11px;border-radius:5px;z-index:2}
+.ba-tag.bef{left:12px;background:rgba(0,0,0,.55);color:#fff}
+.ba-tag.aft{right:12px;background:var(--coral);color:#fff}
+
+/* MARQUEE features */
+.marquee{padding:34px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden}
+.marquee-track{display:flex;gap:46px;animation:scroll 22s linear infinite;white-space:nowrap;width:max-content}
+.marquee-item{font-family:var(--serif);font-size:19px;font-weight:700;color:var(--text3);opacity:.45;display:flex;align-items:center;gap:12px}
+.marquee-item .sep{width:6px;height:6px;border-radius:50%;background:var(--coral);opacity:.5}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* SECTIONS */
+.sec-dark{background:var(--dark);color:#fff;padding:110px 0;position:relative;overflow:hidden}
+.sec-dark .sec-lbl{color:var(--coral)}
+.sec-dark .sec-desc{color:rgba(255,255,255,.6)}
+.sec-light{padding:110px 0}
+.sec-lbl{font-size:11px;font-weight:700;color:var(--coral);text-transform:uppercase;letter-spacing:3px;margin-bottom:14px}
+.sec-ttl{font-family:var(--serif);font-size:clamp(28px,4vw,46px);font-weight:900;line-height:1.1;margin-bottom:16px;letter-spacing:-2px}
+.sec-desc{font-size:17px;color:var(--text2);max-width:560px;line-height:1.7}
+.sec-center{text-align:center}.sec-center .sec-desc{margin:0 auto}
+
+/* PROBLEM */
+.prob-text{font-size:18px;color:var(--text2);line-height:1.8;margin-bottom:20px}
+.prob-text strong{color:var(--text);font-weight:600}
+.prob-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:44px 0}
+.prob-stat{text-align:center;padding:28px 20px;border:1px solid var(--border);border-radius:16px;background:#fff}
+.prob-stat-n{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--coral);letter-spacing:-1px}
+.prob-stat-d{font-size:13px;color:var(--text3);margin-top:4px;line-height:1.4}
+
+/* RENDER CAROUSEL */
+.rcar{padding:46px 0 50px;background:var(--dark);overflow:hidden}
+.rcar-head{text-align:center;margin-bottom:30px;color:#fff}
+.rcar-head .sec-lbl{color:var(--coral)}
+.rcar-head h3{font-family:var(--serif);font-size:clamp(22px,3vw,32px);font-weight:900;letter-spacing:-1px}
+.rcar-track{display:flex;gap:18px;width:max-content;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;will-change:transform}
+.rcar-track.drag{cursor:grabbing}
+.rcar-track img{-webkit-user-drag:none}
+.rcar-item{width:380px;height:250px;border-radius:16px;overflow:hidden;flex-shrink:0;box-shadow:0 16px 40px rgba(0,0,0,.3);position:relative;background:#111}
+.rcar-item img,.rcar-item video{width:100%;height:100%;object-fit:cover}
+.rcar-item .vtag{position:absolute;top:10px;right:10px;background:var(--coral);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;padding:4px 8px;border-radius:4px;z-index:2}
+
+/* SOLUTION cards com mídia */
+.sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:40px 0}
+.sol-card{background:var(--dark2);border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;text-align:center}
+.sol-media{position:relative;height:175px;background:#000;overflow:hidden}
+.sol-media img,.sol-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sol-body{padding:20px 22px 24px}
+.sol-body .t{font-family:var(--serif);font-size:17px;font-weight:700;color:#fff;margin-bottom:6px}
+.sol-body .d{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6}
+
+/* PARA QUEM É — image cards */
+.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.persona-grid.row2{grid-template-columns:repeat(2,1fr);max-width:760px;margin:0 auto}
+.persona{position:relative;border-radius:20px;overflow:hidden;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s;cursor:default}
+.persona:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,0,0,.18)}
+.persona img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform .6s}
+.persona:hover img{transform:scale(1.05)}
+.persona::after{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(8,8,10,.94) 12%,rgba(8,8,10,.55) 45%,rgba(8,8,10,.12) 100%)}
+.persona-body{position:relative;z-index:2;padding:24px}
+.persona h4{font-family:var(--serif);font-size:21px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:-.3px}
+.persona p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.6}
+
+/* MODULES — media-forward */
+.mod{display:grid;grid-template-columns:1.25fr .85fr;gap:0;border-radius:24px;overflow:hidden;margin-bottom:22px;border:1px solid rgba(255,255,255,.07);background:var(--dark2)}
+.mod.flip{direction:rtl}.mod.flip>*{direction:ltr}
+.mod-media{position:relative;min-height:380px;background:#000;overflow:hidden}
+.mod-media img,.mod-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mod-media .ba{position:absolute;inset:0}
+.mod-badge{position:absolute;top:14px;left:14px;z-index:5;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 11px;border-radius:5px;backdrop-filter:blur(4px)}
+.mod-body{padding:40px 36px;display:flex;flex-direction:column;justify-content:center}
+.mod-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--coral);margin-bottom:12px;letter-spacing:2px;text-transform:uppercase}
+.mod-ttl{font-family:var(--serif);font-size:25px;font-weight:900;margin-bottom:12px;letter-spacing:-.5px;line-height:1.15;color:#fff}
+.mod-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.mod-list li{font-size:14px;color:rgba(255,255,255,.6);display:flex;align-items:flex-start;gap:9px;line-height:1.45}
+.mod-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;margin-top:7px}
+
+/* BONUS */
+.bonus-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:46px}
+.bonus-card{background:#fff;border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .4s cubic-bezier(.16,1,.3,1)}
+.bonus-card:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(0,0,0,.1)}
+.bonus-media{position:relative;height:220px;background:#000;overflow:hidden}
+.bonus-media video,.bonus-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bonus-vit{position:relative;height:220px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#0c0c0e}
+.bonus-vit img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.32}
+.bonus-vit .vit-inner{position:relative;z-index:2;text-align:center;color:#fff}
+.bonus-vit .vit-inf{font-size:54px;font-weight:800;line-height:1;color:var(--coral);text-shadow:0 4px 24px rgba(232,85,61,.5)}
+.bonus-vit .vit-txt{font-family:var(--mono);font-size:11px;letter-spacing:3px;margin-top:8px;color:rgba(255,255,255,.7)}
+.bonus-body{padding:22px 24px 26px}
+.bonus-tag{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);margin-bottom:9px}
+.bonus-card h3{font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:7px;letter-spacing:-.3px;line-height:1.2}
+.bonus-card p{font-size:14px;color:var(--text2);line-height:1.6}
+
+/* PROFESSOR */
+.prof-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:54px;align-items:center}
+.prof-photo{border-radius:20px;overflow:hidden;aspect-ratio:3/4;border:1px solid rgba(255,255,255,.08)}
+.prof-photo img{width:100%;height:100%;object-fit:cover}
+.prof-stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:24px}
+.prof-stat .n{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--coral)}
+.prof-stat .d{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px}
+
+/* TESTIMONIALS (workshop style) */
+.dep{background:var(--dark);color:#fff;padding:100px 0 110px;overflow:hidden}
+.dep-head{text-align:center;margin-bottom:46px}
+.dep-marquee-wrap{overflow:hidden;position:relative}
+.dep-marquee-wrap::before,.dep-marquee-wrap::after{content:'';position:absolute;top:0;bottom:0;width:90px;z-index:3;pointer-events:none}
+.dep-marquee-wrap::before{left:0;background:linear-gradient(90deg,var(--dark),transparent)}
+.dep-marquee-wrap::after{right:0;background:linear-gradient(270deg,var(--dark),transparent)}
+.dep-row{display:flex;gap:16px;width:max-content}
+.dep-row.r1{animation:depscroll 64s linear infinite}
+.dep-row.r2{animation:depscroll 78s linear infinite reverse;margin-top:16px}
+.dep-marquee-wrap:hover .dep-row{animation-play-state:paused}
+@keyframes depscroll{to{transform:translateX(-50%)}}
+.dep-card{width:330px;flex-shrink:0;background:var(--dark2);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px}
+.dep-card.wa{background:#0d1a15;border-color:#1a3d2a}
+.dep-head-row{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.dep-avatar{width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#333;position:relative}
+.dep-avatar img{width:100%;height:100%;object-fit:cover}
+.dep-avatar.wa::after{content:'';position:absolute;right:-1px;bottom:-1px;width:15px;height:15px;border-radius:50%;background:#25d366;border:2px solid #0d1a15;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M17 15.5c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1l-.9 1.1c-.2.2-.3.2-.6.1-.9-.4-1.7-.8-2.4-1.7-.2-.3.2-.3.5-.9.1-.1 0-.3 0-.4 0-.1-.7-1.6-.9-2.2-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.4.1-.7.3-.9.9-.9 2.1 0 3.4.9 1.3 1.9 2.3 3.7 3 1.6.6 2 .5 2.7.4.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3z'/%3E%3C/svg%3E");background-size:10px;background-repeat:no-repeat;background-position:center}
+.dep-meta{flex:1;min-width:0}
+.dep-name{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
+.dep-handle{font-size:11px;color:rgba(255,255,255,.4)}
+.dep-stars{font-size:11px;color:#ffbd2e;margin-top:1px}
+.dep-text{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.82)}
+.dep-card.wa .dep-bubble{background:#1f3d2e;border-radius:0 10px 10px 10px;padding:10px 12px;font-size:13.5px;line-height:1.45;color:#e8ffe8;position:relative}
+.dep-card.wa .dep-time{font-size:10px;color:rgba(255,255,255,.4);text-align:right;margin-top:4px}
+.dep-card.wa .dep-time .ck{color:#34b7f1}
+
+/* AULA LIBERADA */
+.aula{padding:110px 0;background:var(--bg)}
+.aula-frame{max-width:860px;margin:42px auto 0;background:var(--dark);border-radius:20px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.16)}
+.aula-bar{display:flex;align-items:center;gap:6px;padding:11px 14px;background:rgba(255,255,255,.05)}
+.aula-bar .d{width:8px;height:8px;border-radius:50%}.aula-bar .d.r{background:#ff5f56}.aula-bar .d.y{background:#ffbd2e}.aula-bar .d.g{background:#27c93f}
+.aula-bar .t{margin-left:8px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.4);text-transform:uppercase}
+.aula-slot{background:#0e0e10}
+.aula-slot iframe{width:100%;aspect-ratio:16/9;display:block;border:0}
+.aula-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.aula-pill{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:100px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text2)}
+.aula-pill::before{content:'\2713';color:var(--coral);font-weight:800}
+.aula-cta-row{text-align:center;margin-top:38px}
+.aula-cta-row .micro{font-size:13px;color:var(--text3);margin-top:12px}
+
+/* RENDERLAB SECTION (brand identity) */
+.rl{background:#000;color:#ebebeb;padding:110px 0;position:relative;overflow:hidden}
+.rl::before{content:'';position:absolute;top:-120px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(204,255,0,.12),transparent 70%);pointer-events:none}
+.rl-grid{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;position:relative;z-index:2}
+.rl-logo{display:inline-flex;align-items:center;border:2px solid rgba(255,255,255,.9);border-radius:14px;overflow:hidden;height:46px;margin-bottom:22px}
+.rl-logo .word{font-family:var(--mono);font-weight:700;font-size:21px;letter-spacing:1px;color:#fff;padding:0 14px 0 16px}
+.rl-logo .ia{background:#fff;color:#000;font-family:var(--mono);font-weight:700;font-size:21px;height:100%;display:flex;align-items:center;padding:0 14px;letter-spacing:1px}
+.rl .sec-lbl{color:#ccff00}
+.rl h2{font-family:var(--serif);font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;color:#fff}
+.rl p{font-size:15.5px;color:rgba(235,235,235,.62);line-height:1.75;margin-bottom:12px}
+.rl-feats{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.rl-feat{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:13px 16px}
+.rl-feat .ic{width:34px;height:34px;border-radius:9px;background:rgba(204,255,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rl-feat .ic svg{width:18px;height:18px;stroke:#ccff00}
+.rl-feat .t1{font-size:14px;font-weight:700;color:#fff}
+.rl-feat .t1 b{color:#ccff00;font-family:var(--mono)}
+.rl-feat .t2{font-size:12px;color:rgba(235,235,235,.4)}
+/* mockup */
+.rl-mock{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0c0c0c;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 1px rgba(204,255,0,.06)}
+.rl-mock-bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:#111;border-bottom:1px solid rgba(255,255,255,.06)}
+.rl-mock-bar .d{width:9px;height:9px;border-radius:50%}
+.rl-mock-bar .d.r{background:#ff5f56}.rl-mock-bar .d.y{background:#ffbd2e}.rl-mock-bar .d.g{background:#27c93f}
+.rl-mock-bar .url{margin-left:10px;font-family:var(--mono);font-size:11px;color:rgba(235,235,235,.4)}
+.rl-mock-body{position:relative}
+.rl-mock-body>img{width:100%;display:block}
+.rl-mock-badge{position:absolute;right:14px;bottom:14px;background:#ccff00;color:#000;font-family:var(--mono);font-size:12px;font-weight:700;padding:7px 13px;border-radius:8px;box-shadow:0 8px 24px rgba(204,255,0,.3)}
+
+/* OFFER */
+.offer{padding:110px 0;background:var(--bg)}
+.offer-wrapper{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:start}
+.offer-left{position:sticky;top:110px}
+.offer-card{background:#fff;border:2px solid var(--coral);border-radius:24px;padding:42px 36px;position:relative;box-shadow:0 24px 70px rgba(232,85,61,.14);overflow:hidden}
+.offer-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--coral),var(--gold))}
+.offer-badge{display:inline-block;background:var(--coral);color:#fff;font-size:11px;font-weight:700;padding:5px 14px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px}
+.offer-title{font-family:var(--serif);font-size:28px;font-weight:900;margin-bottom:4px;letter-spacing:-1px}
+.offer-sub{font-size:14px;color:var(--text3);margin-bottom:22px}
+.offer-list{list-style:none;display:flex;flex-direction:column;gap:9px;margin:18px 0 24px}
+.offer-list li{font-size:14px;color:var(--text2);display:flex;align-items:flex-start;gap:9px;line-height:1.45}
+.offer-list li::before{content:'\2713';color:var(--coral);font-weight:800;flex-shrink:0}
+.offer-list li.bn::before{content:'\1F381';font-size:13px}
+.offer-old{font-size:16px;color:var(--text3)}
+.offer-old s{text-decoration:line-through}
+.offer-price{font-family:var(--mono);font-size:54px;font-weight:700;color:var(--coral);letter-spacing:-3px;margin:2px 0;line-height:1}
+.offer-price span{font-size:18px;font-weight:400;color:var(--text3);letter-spacing:0}
+.offer-inst{font-size:14px;color:var(--text2);margin:8px 0 22px}
+.offer-inst b{color:var(--text);font-weight:700}
+.offer-cta{display:block;width:100%;background:var(--coral);color:#fff;padding:20px;border-radius:13px;font-weight:800;font-size:18px;border:none;cursor:pointer;transition:all .25s;letter-spacing:-.2px;text-align:center;box-shadow:0 10px 30px rgba(232,85,61,.35);animation:cta-pulse 1.8s ease-in-out infinite}
+.offer-cta:hover{background:var(--coral-d);transform:translateY(-2px)}
+.offer-guar{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:13px;color:var(--text3)}
+
+/* FAQ */
+.faq-list{max-width:680px;margin:44px auto 0;display:flex;flex-direction:column;gap:10px}
+.faq-item{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.faq-q{padding:18px 22px;font-size:15px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.faq-q:hover{color:var(--coral)}
+.faq-q .arr{transition:transform .3s;color:var(--text3);font-size:14px;flex-shrink:0}
+.faq-a{padding:0 22px 18px;font-size:14px;color:var(--text2);line-height:1.7;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-item.open .arr{transform:rotate(180deg)}
+
+/* FINAL */
+.final{padding:110px 0;text-align:center}
+.final h2{font-family:var(--serif);font-size:clamp(28px,4.5vw,50px);font-weight:900;margin-bottom:18px;letter-spacing:-2px}
+.final h2 em{font-style:italic;color:var(--coral)}
+.final p{font-size:17px;color:var(--text2);margin-bottom:32px}
+footer{padding:30px 0;border-top:1px solid var(--border);text-align:center;font-size:12px;color:var(--text3)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+.hero{padding:88px 0 40px}
+.mod,.mod.flip{grid-template-columns:1fr;direction:ltr}
+.mod-media{min-height:280px}
+.bonus-grid,.persona-grid,.persona-grid.row2,.sol-grid{grid-template-columns:1fr}
+.prof-grid,.rl-grid,.offer-wrapper{grid-template-columns:1fr;gap:32px}
+.prof-photo{max-width:360px;margin:0 auto;order:-1}
+.offer-left{position:static}
+.prob-stats{grid-template-columns:1fr}
+.rcar-item{width:300px;height:200px}
+.dep-card{width:290px}
+}
+/* timeline do hero no mobile: deck de cards (o de trás vira o da frente) */
+.wf-dots{display:none;align-items:center;justify-content:center;gap:5px;margin:0 0 36px}
+.wf-dot{display:flex;align-items:center;gap:6px;border:1.5px solid var(--border2);background:#fff;border-radius:100px;padding:5px 12px 5px 6px;color:var(--text3);font-size:11px;font-weight:700;letter-spacing:.2px;cursor:pointer;transition:all .3s}
+.wf-dot b{width:17px;height:17px;border-radius:50%;background:var(--border);color:var(--text3);font-family:var(--mono);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.wf-dot.on{background:var(--dark);border-color:var(--dark);color:#fff}
+.wf-dot.on b{background:var(--coral);color:#fff}
+.wf-dash{color:var(--coral);font-weight:700;font-size:13px;line-height:1}
+@media(max-width:640px){
+.hero h1{font-size:27px}
+.wf{position:relative;max-width:272px;aspect-ratio:4/5;margin:6px auto 30px}
+.wf-step{position:absolute;inset:0;width:100%;flex:none;transition:transform .7s cubic-bezier(.22,1,.36,1),box-shadow .7s ease}
+.wf-step.pos0{transform:none!important;z-index:3;box-shadow:0 24px 56px rgba(0,0,0,.24)}
+.wf-step.pos1{transform:translate(12px,13px) rotate(3.5deg) scale(.96)!important;z-index:2;box-shadow:0 14px 34px rgba(0,0,0,.14)}
+.wf-step.pos2{transform:translate(-12px,15px) rotate(-3.5deg) scale(.93)!important;z-index:1;box-shadow:0 10px 26px rgba(0,0,0,.1)}
+.wf-link{display:none}
+.wf-dots{display:flex}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+<div class="ctn topbar-inner">
+<span class="topbar-text"><span class="tb-of">OFERTA </span>ATÉ HOJE <b id="tbDate" class="tb-dl">--/--/----</b><b id="tbDateS" class="tb-ds">--/--</b><span class="tb-x"> — <span class="old">R$ 497,00</span> por</span><span class="tb-sep"> —</span> <span class="hl">12x de R$ 19,43</span><span class="tb-x2"> · ACESSO IMEDIATO E VITALÍCIO</span></span>
+<a href="https://pay.hotmart.com/E105428912P?bid=1781234090340" target="_blank" rel="noopener" class="topbar-btn">Garantir vaga &rarr;</a>
+</div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-bg">
+<div class="hero-bg-img"></div>
+<div class="hero-circle c1"></div>
+<div class="hero-circle c2"></div>
+<div class="hero-dots"></div>
+</div>
+<div class="ctn">
+<div class="hero-content">
+<div class="hero-logo">
+<div class="vr-logo">
+<div class="vr-logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+<div class="vr-logo-type"><span>Vibe</span> Render</div>
+</div>
+</div>
+<div class="hero-tag">Minicurso prático &bull; 23 aulas &bull; 2 horas &bull; direto ao ponto</div>
+<div class="wf">
+<div class="wf-step t1">
+<img src="assets/img/antes.jpg" alt="Print do SketchUp">
+<div class="wf-chip"><span class="num">1</span><span class="txt">Print do SketchUp</span></div>
+</div>
+<div class="wf-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m0 0l-6-6m6 6l6-6"/></svg><span>vira</span></div>
+<div class="wf-step t2">
+<img src="assets/img/depois.jpg" alt="Render ultrarrealista">
+<div class="wf-chip"><span class="num">2</span><span class="txt">Render ultrarrealista</span></div>
+</div>
+<div class="wf-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14m0 0l-6-6m6 6l6-6"/></svg><span>vira</span></div>
+<div class="wf-step t3">
+<video src="assets/video/hero-anim.mp4" muted loop playsinline autoplay poster="assets/img/poster-hero-anim.jpg"></video>
+<div class="wf-chip"><span class="num">3</span><span class="txt">Animação de cinema</span></div>
+</div>
+</div>
+<div class="wf-dots">
+<button type="button" class="wf-dot" aria-label="Print do SketchUp"><b>1</b>Print</button>
+<span class="wf-dash">&rarr;</span>
+<button type="button" class="wf-dot" aria-label="Render ultrarrealista"><b>2</b>Render</button>
+<span class="wf-dash">&rarr;</span>
+<button type="button" class="wf-dot" aria-label="Animação de cinema"><b>3</b>Animação</button>
+</div>
+<h1>Aprenda a criar renders<br>ultrarrealistas e animações<br>de cinema <em>com IA</em></h1>
+<p class="hero-sub">Em apenas 2 horas você aprende a transformar um simples print do SketchUp em imagens fotorrealistas, vídeos cinemáticos e apresentações narradas com IA — mesmo que nunca tenha usado IA na vida. Sem V-Ray. Sem Photoshop. Sem PC gamer.</p>
+<div class="hero-ctas">
+<a href="https://pay.hotmart.com/E105428912P?bid=1781234090340" target="_blank" rel="noopener" class="btn-coral pulse">Quero começar agora &rarr;</a>
+<a href="#conteudo" class="btn-outline">Ver o conteúdo</a>
+</div>
+<p class="hero-micro"><strong>Acesso vitalício</strong> &bull; Garantia de 7 dias &bull; Atualizações inclusas para sempre</p>
+</div>
+</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee">
+<div class="marquee-track" id="mq"></div>
+</div>
+
+<!-- PROBLEM -->
+<section class="sec-light reveal">
+<div class="ctn-n">
+<div class="sec-lbl">O problema</div>
+<div class="sec-ttl">Você gasta horas no render,<br>o resultado não fica real,<br>e a concorrência já usa IA.</div>
+<br>
+<p class="prob-text">Se você é arquiteto, designer de interiores ou artista 3D, provavelmente já viveu isso: <strong>horas configurando material, luz e câmera no V-Ray ou Lumion</strong>, esperando o computador processar, e no final o cliente olha e fala &ldquo;legal, mas não tá parecendo real&rdquo;.</p>
+<p class="prob-text">Enquanto isso, você vê colegas no Instagram postando animações cinemáticas de cair o queixo — e se pergunta: <strong>&ldquo;como eles fazem isso?&rdquo;</strong></p>
+<p class="prob-text">A resposta é inteligência artificial. Mas quando você tenta usar, precisa de <strong>5 ferramentas diferentes</strong> (Freepik, Nano Banana, Kling, Runway...), cada uma com interface, preço e limitações próprias. A IA muda a planta, troca os móveis, inventa janelas. Bonito, mas não é o seu projeto.</p>
+<p class="prob-text">Pesquisamos <strong>mais de 10.000 profissionais</strong> de arquitetura e design. Os dados confirmam:</p>
+</div>
+<div class="ctn">
+<div class="prob-stats reveal">
+<div class="prob-stat"><div class="prob-stat-n">75%</div><div class="prob-stat-d">já tentaram usar IA nos renders<br>e não conseguiram dominar</div></div>
+<div class="prob-stat"><div class="prob-stat-n">58%</div><div class="prob-stat-d">dos profissionais faturam<br>menos de R$ 6 mil/mês</div></div>
+<div class="prob-stat"><div class="prob-stat-n">5x</div><div class="prob-stat-d">mais chance de faturar R$ 30k+<br>quem domina IA no workflow</div></div>
+</div>
+</div>
+<div class="ctn-n">
+<p class="prob-text"><strong>O problema nunca foi falta de vontade ou de talento.</strong> É que até agora ninguém juntou tudo numa única ferramenta e te ensinou, de forma prática, a usar no seu dia a dia de projetos.</p>
+</div>
+</section>
+
+<!-- RENDER CAROUSEL -->
+<div class="rcar reveal">
+<div class="rcar-head">
+<div class="sec-lbl">Feito dentro do curso</div>
+<h3>Isso é o que você vai aprender a criar</h3>
+</div>
+<div class="rcar-track" id="rcar"></div>
+</div>
+
+<!-- SOLUTION -->
+<section class="sec-dark" style="padding:100px 0">
+<div class="ctn-n" style="text-align:center">
+<div class="sec-lbl reveal">A solução</div>
+<div class="sec-ttl reveal" style="color:#fff;font-size:clamp(26px,4vw,42px)">E se em apenas 2 horas você aprendesse a criar tudo isso?</div>
+<br>
+<div class="reveal sol-grid">
+<div class="sol-card">
+<div class="sol-media"><img src="assets/img/sol-render.jpg" alt="Render ultrarrealista de interior" loading="lazy"></div>
+<div class="sol-body"><div class="t">Renders ultrarrealistas</div><div class="d">Imagens fotorrealistas a partir de um print do SketchUp, com estilos, iluminação e materiais aplicados automaticamente.</div></div>
+</div>
+<div class="sol-card">
+<div class="sol-media"><video class="lazyvid" data-src="assets/video/sol-cinema.mp4" muted loop playsinline preload="none"></video></div>
+<div class="sol-body"><div class="t">Animações de cinema</div><div class="d">Vídeos walkthrough com movimento de câmera suave, narrados com voz profissional gerada por IA. O conteúdo que viraliza.</div></div>
+</div>
+<div class="sol-card">
+<div class="sol-media"><video class="lazyvid" data-src="assets/video/sol-transforma.mp4" muted loop playsinline preload="none"></video></div>
+<div class="sol-body"><div class="t">Sem complexidade</div><div class="d">Tudo com poucos cliques, sem escrever prompts, sem Photoshop, sem PC gamer. Roda 100% na nuvem, direto no navegador.</div></div>
+</div>
+</div>
+<p class="sec-desc reveal" style="color:rgba(255,255,255,.55);text-align:center;margin:0 auto">O <strong style="color:#fff">Vibe Render</strong> é um minicurso de 2 horas, com 23 aulas 100% práticas, que te ensina exatamente como criar tudo isso — do zero, passo a passo, clique a clique. Sem teoria. Sem enrolação. Você termina e já sai produzindo.</p>
+</div>
+</section>
+
+<!-- PARA QUEM É -->
+<section class="sec-light">
+<div class="ctn">
+<div class="sec-center reveal" style="margin-bottom:46px">
+<div class="sec-lbl">Para quem é</div>
+<div class="sec-ttl">O Vibe Render foi feito<br>para você se...</div>
+</div>
+<div class="persona-grid">
+<div class="persona reveal">
+<img src="assets/img/persona-arq.jpg" alt="">
+<div class="persona-body"><h4>Arquiteto</h4><p>Seus projetos são bons, mas seus renders não transmitem isso. Quer imagens e vídeos de cinema que façam o cliente dizer &ldquo;UAU&rdquo; e parar de perder horas no V-Ray.</p></div>
+</div>
+<div class="persona reveal reveal-d1">
+<img src="assets/img/car-interior.jpg" alt="">
+<div class="persona-body"><h4>Designer de interiores</h4><p>Depende de renderista externo e isso come sua margem. Quer autonomia para entregar renders e vídeos sozinha, sem Photoshop e sem complexidade.</p></div>
+</div>
+<div class="persona reveal reveal-d2">
+<img src="assets/img/persona-artista.jpg" alt="">
+<div class="persona-body"><h4>Artista 3D / Archviz</h4><p>Já sabe renderizar mas quer se diferenciar com animações e IA. Quer entregar mais rápido, cobrar mais caro e oferecer o que a concorrência não oferece.</p></div>
+</div>
+</div>
+<div class="persona-grid row2">
+<div class="persona reveal">
+<img src="assets/img/persona-eng.jpg" alt="">
+<div class="persona-body"><h4>Engenheiro ou profissional adjacente</h4><p>Não é arquiteto mas vê uma oportunidade enorme no mercado de renders com IA. Quer aprender do zero, criar uma nova fonte de renda ou agregar IA ao trabalho atual.</p></div>
+</div>
+<div class="persona reveal reveal-d1">
+<img src="assets/img/persona-imob.jpg" alt="">
+<div class="persona-body"><h4>Mercado imobiliário</h4><p>Corretor, incorporador ou construtora que quer apresentar empreendimentos com renders e animações de alto impacto — sem depender de estúdio externo e sem gastar uma fortuna.</p></div>
+</div>
+</div>
+<div class="reveal" style="text-align:center;margin-top:40px">
+<p style="font-size:15px;color:var(--text3);max-width:520px;margin:0 auto;line-height:1.7">Não importa seu nível técnico — <strong style="color:var(--text)">75% dos nossos alunos nunca tinham dominado IA</strong> antes de começar. O Vibe Render foi feito para quem quer resultado, não para quem já sabe tudo.</p>
+</div>
+</div>
+</section>
+
+<!-- MODULES -->
+<section class="sec-dark" id="conteudo">
+<div class="ctn">
+<div class="sec-center reveal" style="margin-bottom:54px">
+<div class="sec-lbl">Conteúdo do minicurso</div>
+<div class="sec-ttl" style="color:#fff">23 aulas. 2 horas.<br>Do zero ao render de cinema.</div>
+<p class="sec-desc">Cada aula é prática, direto ao ponto. Você termina o minicurso e já sai produzindo no mesmo dia.</p>
+</div>
+
+<div class="mod reveal">
+<div class="mod-media">
+<span class="mod-badge">Antes / Depois</span>
+<div class="ba" data-ba>
+<img src="assets/img/m01-antes.jpg" alt="Print SketchUp">
+<div class="after-wrap"><img src="assets/img/m01-depois.jpg" alt="Render realista"></div>
+<span class="ba-tag bef">SketchUp</span>
+<span class="ba-tag aft">Render</span>
+<div class="ba-handle"><div class="ba-knob">&#8596;</div></div>
+</div>
+</div>
+<div class="mod-body">
+<div class="mod-num">Módulo 01 &mdash; 8 aulas</div>
+<div class="mod-ttl">Imagens estáticas: do zero ao render de cinema</div>
+<ul class="mod-list">
+<li>Print Render: do SketchUp ao fotorrealismo em segundos</li>
+<li>Decoração de ambientes com 15 estilos prontos</li>
+<li>11 moods de iluminação com um clique</li>
+<li>Planta humanizada, maquete, croqui e moodboard</li>
+</ul>
+</div>
+</div>
+
+<div class="mod flip reveal">
+<div class="mod-media">
+<span class="mod-badge">Edição por texto</span>
+<video class="lazyvid" data-src="assets/video/m02-edicao.mp4" muted loop playsinline preload="none" poster="assets/img/poster-m02-edicao.jpg"></video>
+</div>
+<div class="mod-body">
+<div class="mod-num">Módulo 02 &mdash; 5 aulas</div>
+<div class="mod-ttl">Edição: refine sem sair da ferramenta</div>
+<ul class="mod-list">
+<li>Edite qualquer elemento com texto natural, em português</li>
+<li>Controle de iluminação com toggles ON/OFF</li>
+<li>Troca de céu, clima, texturas e materiais</li>
+<li>Recorte inteligente e close automático</li>
+</ul>
+</div>
+</div>
+
+<div class="mod reveal">
+<div class="mod-media">
+<span class="mod-badge">Animação + Narração</span>
+<video class="lazyvid" data-src="assets/video/m03-animacao.mp4" muted loop playsinline preload="none" poster="assets/img/poster-m03-animacao.jpg"></video>
+</div>
+<div class="mod-body">
+<div class="mod-num">Módulo 03 &mdash; 3 aulas</div>
+<div class="mod-ttl">Animação: dê vida aos seus projetos</div>
+<ul class="mod-list">
+<li>Animações cinemáticas a partir de dois frames</li>
+<li>Walkthroughs com movimento de câmera suave</li>
+<li>Narração profissional com IA em 5 vozes</li>
+</ul>
+</div>
+</div>
+
+<div class="mod flip reveal">
+<div class="mod-media">
+<span class="mod-badge">Upscale 4K</span>
+<video class="lazyvid" data-src="assets/video/m04-upscale.mp4" muted loop playsinline preload="none" poster="assets/img/poster-m04-upscale.jpg"></video>
+</div>
+<div class="mod-body">
+<div class="mod-num">Módulo 04 &mdash; 2 aulas</div>
+<div class="mod-ttl">Upscale e finalização: qualidade de impressão</div>
+<ul class="mod-list">
+<li>De 2K para 4K com controle de HDR e nitidez</li>
+<li>Expanda limites com 17 ângulos de câmera</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<!-- BONUS -->
+<section class="sec-light">
+<div class="ctn">
+<div class="sec-center reveal">
+<div class="sec-lbl">Bônus exclusivos</div>
+<div class="sec-ttl">Você ainda leva 4 bônus<br>que não estão à venda.</div>
+</div>
+<div class="bonus-grid">
+
+<div class="bonus-card reveal">
+<div class="bonus-media"><video class="lazyvid" data-src="assets/video/bonus-timelapse.mp4" muted loop playsinline preload="none" poster="assets/img/poster-bonus-timelapse.jpg"></video></div>
+<div class="bonus-body">
+<div class="bonus-tag">Bônus 01</div>
+<h3>Timelapse de construção com IA</h3>
+<p>Crie o criativo que mostra a construção do projeto do terreno vazio até a entrega final. Conteúdo de altíssimo impacto para redes sociais.</p>
+</div>
+</div>
+
+<div class="bonus-card reveal reveal-d1">
+<div class="bonus-media"><video class="lazyvid" data-src="assets/video/bonus-pessoa.mp4" muted loop playsinline preload="none" poster="assets/img/poster-bonus-pessoa.jpg"></video></div>
+<div class="bonus-body">
+<div class="bonus-tag">Bônus 02</div>
+<h3>Coloque o cliente dentro do render</h3>
+<p>Insira você ou seu cliente dentro das cenas renderizadas. Conexão emocional imediata. A aprovação do projeto vira quase automática.</p>
+</div>
+</div>
+
+<div class="bonus-card reveal reveal-d2">
+<div class="bonus-media"><video class="lazyvid" data-src="assets/video/bonus-desenho.mp4" muted loop playsinline preload="none" poster="assets/img/poster-bonus-desenho.jpg"></video></div>
+<div class="bonus-body">
+<div class="bonus-tag">Bônus 03</div>
+<h3>Desenho técnico com IA</h3>
+<p>Transforme seus projetos em pranchas e desenhos técnicos com a ajuda da IA. Mais agilidade na documentação, do conceito à apresentação.</p>
+</div>
+</div>
+
+<div class="bonus-card reveal reveal-d3">
+<div class="bonus-vit">
+<img src="assets/img/bonus-vitalicio.jpg" alt="">
+<div class="vit-inner"><div class="vit-inf">&#8734;</div><div class="vit-txt">ACESSO VITALÍCIO</div></div>
+</div>
+<div class="bonus-body">
+<div class="bonus-tag">Bônus 04</div>
+<h3>Acesso vitalício + atualizações</h3>
+<p>O curso é seu para sempre. Cada vez que novas funcionalidades surgirem, as aulas serão atualizadas e você recebe tudo sem pagar nada a mais.</p>
+</div>
+</div>
+
+</div>
+</div>
+</section>
+
+<!-- PROFESSOR -->
+<section class="sec-dark" style="padding:100px 0">
+<div class="ctn">
+<div class="prof-grid reveal">
+<div>
+<div class="sec-lbl">Quem ensina</div>
+<div class="sec-ttl" style="color:#fff;font-size:clamp(28px,3.5vw,40px)">Luiz Montani</div>
+<p style="font-size:16px;color:rgba(255,255,255,.5);font-weight:500;margin-bottom:18px;font-style:italic;font-family:var(--serif)">Arquiteto, Artista 3D e fundador do estúdio de renderização de alto padrão mais seguido do mundo.</p>
+<p style="font-size:15px;color:rgba(255,255,255,.5);line-height:1.8;margin-bottom:14px">Nos últimos anos, Montani transformou visualização 3D em um negócio de sucesso combinando renderização de alta qualidade com inteligência artificial. Acumulou mais de <strong style="color:#fff">700 mil seguidores</strong> e ultrapassou <strong style="color:#fff">100 milhões de visualizações orgânicas</strong>.</p>
+<p style="font-size:15px;color:rgba(255,255,255,.5);line-height:1.8">Já formou mais de <strong style="color:#fff">10.000 profissionais</strong> entre workshops e formações, e criou o RenderLAB — a plataforma que transforma a maneira como arquitetos e designers criam imagens e vídeos de projetos.</p>
+<div class="prof-stats">
+<div class="prof-stat"><div class="n">700k+</div><div class="d">Seguidores</div></div>
+<div class="prof-stat"><div class="n">100M+</div><div class="d">Visualizações</div></div>
+<div class="prof-stat"><div class="n">10k+</div><div class="d">Alunos formados</div></div>
+</div>
+</div>
+<div class="prof-photo"><img src="assets/img/montani.jpg" alt="Luiz Montani"></div>
+</div>
+</div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="dep">
+<div class="ctn">
+<div class="dep-head reveal">
+<div class="sec-lbl" style="color:var(--coral)">Depoimentos</div>
+<div class="sec-ttl" style="color:#fff">Quem já usa, não volta atrás.</div>
+</div>
+</div>
+<div class="dep-marquee-wrap">
+<div class="dep-row r1" id="depRow1"></div>
+<div class="dep-row r2" id="depRow2"></div>
+</div>
+</section>
+
+<!-- AULA LIBERADA -->
+<section class="aula" id="aula">
+<div class="ctn">
+<div class="sec-center reveal">
+<div class="sec-lbl">Aula liberada &bull; assista de graça</div>
+<div class="sec-ttl">Veja por dentro: assista<br>uma aula completa do curso</div>
+<p class="sec-desc" style="margin:0 auto">Liberamos a aula <strong>Print to Render em residenciais</strong> — a técnica que pega um print do SketchUp e transforma em render fotorrealista, clique a clique. Aperte o play e veja com seus próprios olhos como é simples.</p>
+</div>
+<div class="aula-frame reveal">
+<div class="aula-bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="t">Aula &bull; Print to Render em residenciais</span></div>
+<div class="aula-slot" id="aulaEmbed">
+<vturb-smartplayer id="vid-6a2b930d7f684d974fa50130" style="display:block;margin:0 auto;width:100%"></vturb-smartplayer>
+</div>
+<script type="text/javascript">
+var aulaS=document.createElement("script");
+aulaS.src="https://scripts.converteai.net/5410d72a-3d75-4866-998c-d685b8982e29/players/6a2b930d7f684d974fa50130/v4/player.js";
+aulaS.async=!0;document.head.appendChild(aulaS);
+</script>
+</div>
+<div class="aula-pills reveal">
+<span class="aula-pill">Aula real, sem cortes</span>
+<span class="aula-pill">Do print ao render em minutos</span>
+<span class="aula-pill">1 de 23 aulas do minicurso</span>
+</div>
+<div class="aula-cta-row reveal">
+<a href="#oferta" class="btn-coral pulse" style="padding:19px 42px;font-size:17px">Gostei, quero o minicurso completo &rarr;</a>
+<div class="micro">23 aulas como essa &bull; Acesso vitalício &bull; Garantia de 7 dias</div>
+</div>
+</div>
+</section>
+
+<!-- RENDERLAB -->
+<section class="rl" id="ferramenta">
+<div class="ctn">
+<div class="rl-grid reveal">
+<div>
+<div class="rl-logo"><span class="word">RENDERLAB</span><span class="ia">AI</span></div>
+<div class="sec-lbl">A ferramenta</div>
+<h2>Qual ferramenta vamos usar no minicurso?</h2>
+<p>No Vibe Render, todas as aulas usam o <strong style="color:#ccff00">RenderLAB</strong> — uma plataforma que reúne renderização, edição, animação, narração com IA e upscale 4K num único lugar.</p>
+<p>Enquanto outros profissionais alternam entre 5 ferramentas, você faz tudo dentro de uma só. Sem instalar nada, 100% na nuvem.</p>
+<div class="rl-feats">
+<div class="rl-feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M5 5h9a3 3 0 010 6H5M5 13h11a3 3 0 010 6H5"/></svg></div><div><div class="t1">Planos a partir de <b>R$ 97/mês</b></div><div class="t2">Acesso a todas as ferramentas da plataforma</div></div></div>
+<div class="rl-feat"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6M12 2v13m0 0l4-4m-4 4l-4-4"/></svg></div><div><div class="t1">Cupom exclusivo de 10% para alunos</div><div class="t2">Desconto na assinatura para quem entra no Vibe Render</div></div></div>
+</div>
+</div>
+<div>
+<div class="rl-mock">
+<div class="rl-mock-bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="url">renderlab.club/studio</span></div>
+<div class="rl-mock-body">
+<img src="assets/img/rl-ui.jpg" alt="Interface do RenderLAB">
+<div class="rl-mock-badge">Render em ~30s</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- OFFER -->
+<section class="offer" id="oferta">
+<div class="ctn">
+<div class="offer-wrapper">
+<div class="offer-left reveal">
+<div class="sec-lbl">Oferta</div>
+<div class="sec-ttl">Tudo isso por menos<br>do que você paga em<br>um render terceirizado.</div>
+<br>
+<p class="sec-desc">Um renderista cobra R$ 300&ndash;500 por imagem. Uma consultoria com um expert custa mais de R$ 2 mil por hora. O Vibe Render te ensina a fazer tudo sozinho, em 2 horas, com acesso vitalício, por uma fração desse valor.</p>
+</div>
+<div class="offer-right reveal reveal-d1">
+<div class="offer-card">
+<div class="offer-badge">Oferta de lançamento</div>
+<div class="offer-title">Vibe Render</div>
+<div class="offer-sub">23 aulas &bull; 2 horas &bull; Acesso vitalício &bull; 4 bônus</div>
+<ul class="offer-list">
+<li>Módulo 1: Imagens estáticas (8 aulas)</li>
+<li>Módulo 2: Edição por texto (5 aulas)</li>
+<li>Módulo 3: Animação + narração IA (3 aulas)</li>
+<li>Módulo 4: Upscale 4K (2 aulas)</li>
+<li class="bn">Bônus: Timelapse de construção</li>
+<li class="bn">Bônus: Cliente dentro do render</li>
+<li class="bn">Bônus: Desenho técnico com IA</li>
+<li class="bn">Bônus: Acesso vitalício + atualizações</li>
+<li>Cupom de 10% no RenderLAB</li>
+</ul>
+<div class="offer-old">De <s>R$ 497,00</s> por apenas</div>
+<div class="offer-price"><span style="font-size:22px;letter-spacing:-1px;color:var(--text2)">12x</span> R$ 19<span style="font-size:26px;color:var(--coral);font-weight:700;letter-spacing:-1px">,43</span></div>
+<div class="offer-inst">ou <b>R$ 197,00</b> à vista</div>
+<a href="https://pay.hotmart.com/E105428912P?bid=1781234090340" class="offer-cta" target="_blank" rel="noopener">Garantir minha vaga agora &rarr;</a>
+<div class="offer-guar">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+Garantia incondicional de 7 dias &bull; Acesso vitalício
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section class="sec-light" id="faq">
+<div class="ctn">
+<div class="sec-center reveal">
+<div class="sec-lbl">Dúvidas</div>
+<div class="sec-ttl">Perguntas frequentes</div>
+</div>
+<div class="faq-list">
+<div class="faq-item open"><div class="faq-q">O Vibe Render é pra mim? <span class="arr">&#9660;</span></div><div class="faq-a">É pra você se: trabalha com arquitetura, design de interiores ou renderização 3D e quer entregar imagens e vídeos com mais qualidade e menos tempo; quer usar IA de verdade nos seus projetos; quer impressionar clientes com animações cinemáticas; ou quer parar de depender de renderista externo.</div></div>
+<div class="faq-item"><div class="faq-q">Pra quem NÃO é esse curso? <span class="arr">&#9660;</span></div><div class="faq-a">Não é pra quem busca algo teórico sobre IA, quer um curso longo e extenso (pra isso existe a Formação Render.IA), ou não está disposto a dedicar 2 horas e colocar em prática.</div></div>
+<div class="faq-item"><div class="faq-q">São só 2 horas. Dá pra aprender de verdade? <span class="arr">&#9660;</span></div><div class="faq-a">Sim. O Vibe Render foi desenhado pra ser direto ao ponto — sem enrolação, sem teoria desnecessária. A ferramenta usada no curso simplifica tanto o processo que a maioria das funcionalidades se aprende em minutos. Você termina e já sai produzindo no mesmo dia.</div></div>
+<div class="faq-item"><div class="faq-q">Preciso saber usar SketchUp? <span class="arr">&#9660;</span></div><div class="faq-a">Se você já sabe, perfeito. Se não, dá pra começar com qualquer software 3D que gere uma imagem: Revit, ArchiCAD, 3Ds Max, Blender — basta um print da tela.</div></div>
+<div class="faq-item"><div class="faq-q">Meu computador é fraco. Vai funcionar? <span class="arr">&#9660;</span></div><div class="faq-a">Sim. Todo o processamento acontece na nuvem. Se o seu computador abre YouTube, ele roda a ferramenta do curso.</div></div>
+<div class="faq-item"><div class="faq-q">Preciso saber escrever prompts em inglês? <span class="arr">&#9660;</span></div><div class="faq-a">Não. A maioria das funções usa seleção por clique. Para edições específicas, você escreve em português natural. Sem prompt complexo, sem inglês.</div></div>
+<div class="faq-item"><div class="faq-q">O curso inclui acesso à ferramenta? <span class="arr">&#9660;</span></div><div class="faq-a">O Vibe Render é o treinamento (23 aulas). A ferramenta usada nas aulas é o RenderLAB, com planos a partir de R$ 97/mês. Todo aluno ganha um cupom de 10% de desconto na assinatura.</div></div>
+<div class="faq-item"><div class="faq-q">O acesso é vitalício mesmo? <span class="arr">&#9660;</span></div><div class="faq-a">Sim. Você paga uma vez e o curso é seu para sempre. Todas as atualizações futuras também estão inclusas, sem custo adicional.</div></div>
+<div class="faq-item"><div class="faq-q">Qual a diferença para a Formação Render.IA? <span class="arr">&#9660;</span></div><div class="faq-a">O Vibe Render é focado em resultados rápidos: 2 horas, 23 aulas, uma única ferramenta. A Formação é mais completa: 70+ aulas, 15+ ferramentas, mentorias ao vivo quinzenais, comunidade exclusiva e agentes GPT. Se quer começar rápido, Vibe Render. Se quer domínio total, Formação.</div></div>
+<div class="faq-item"><div class="faq-q">E se eu travar em alguma aula? <span class="arr">&#9660;</span></div><div class="faq-a">As aulas são curtas e direto ao ponto, e ficam disponíveis no seu acesso vitalício para rever quantas vezes quiser. Como tudo é feito clique a clique dentro de uma única ferramenta, é difícil travar — e qualquer aula pode ser revista no ritmo que você precisar.</div></div>
+<div class="faq-item"><div class="faq-q">E se eu não gostar? <span class="arr">&#9660;</span></div><div class="faq-a">Garantia incondicional de 7 dias. Se não valeu, devolvemos 100% do valor. Sem perguntas, sem burocracia. O risco é todo nosso.</div></div>
+</div>
+</div>
+</section>
+
+<!-- FINAL -->
+<section class="final reveal">
+<div class="ctn">
+<h2>Daqui a 6 meses, a IA vai<br>ter avançado ainda mais.<br><em>Você vai estar preparado?</em></h2>
+<p>23 aulas práticas. 2 horas. Acesso vitalício. Do zero ao render de cinema.</p>
+<a href="https://pay.hotmart.com/E105428912P?bid=1781234090340" class="btn-coral pulse" target="_blank" rel="noopener" style="padding:20px 44px;font-size:18px">Quero começar agora &rarr;</a>
+</div>
+</section>
+
+<footer><div class="ctn"><p>&copy; 2026 Vibe Render &mdash; por Montani. Todos os direitos reservados.</p></div></footer>
+
+<script>
+/* ---- DATA dinâmica ---- */
+(function(){var d=new Date();var p=n=>String(n).padStart(2,'0');document.getElementById('tbDate').textContent=p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();document.getElementById('tbDateS').textContent=p(d.getDate())+'/'+p(d.getMonth()+1);})();
+
+/* timeline do hero no mobile: alterna os 3 passos automaticamente */
+(function(){
+var mq=matchMedia('(max-width:640px)');
+var steps=[].slice.call(document.querySelectorAll('.wf-step'));
+var dots=[].slice.call(document.querySelectorAll('.wf-dot'));
+if(!steps.length||!dots.length)return;
+var i=0,timer=null;
+function show(n){i=n;steps.forEach(function(s,k){
+s.classList.remove('pos0','pos1','pos2');
+s.classList.add('pos'+((k-n+steps.length)%steps.length));
+});dots.forEach(function(d,k){d.classList.toggle('on',k===n)})}
+function loop(){clearInterval(timer);timer=setInterval(function(){show((i+1)%steps.length)},3200)}
+function apply(){
+if(mq.matches){show(0);loop()}
+else{clearInterval(timer);timer=null;steps.forEach(function(s){s.classList.remove('pos0','pos1','pos2')});dots.forEach(function(d){d.classList.remove('on')})}
+}
+dots.forEach(function(d,k){d.addEventListener('click',function(){show(k);loop()})});
+mq.addEventListener?mq.addEventListener('change',apply):mq.addListener(apply);
+apply();
+})();
+
+/* ---- MARQUEE features ---- */
+(function(){var feats=['Print Render','15 estilos de decoração','11 moods de iluminação','Animações cinemáticas','Narração com IA','Upscale 4K','Planta humanizada','Maquete física','17 ângulos de câmera','Desenho técnico','100% na nuvem'];var html='';for(var k=0;k<2;k++){feats.forEach(f=>{html+='<span class="marquee-item">'+f+' <span class="sep"></span></span>';});}document.getElementById('mq').innerHTML=html;})();
+
+/* ---- RENDER CAROUSEL (11 itens únicos, imagens + vídeos) ---- */
+(function(){
+var items=[
+ {v:'car-predio.mp4'},
+ {i:'car-fireworks.jpg'},
+ {v:'car-sketch.mp4'},
+ {i:'car-sportscar.jpg'},
+ {v:'car-estacoes.mp4'},
+ {i:'car-koi.jpg'},
+ {i:'car-house.jpg'}
+];
+var html='';
+for(var k=0;k<2;k++){items.forEach(function(it){
+ if(it.v){html+='<div class="rcar-item"><video class="lazyvid" data-src="assets/video/'+it.v+'" muted loop playsinline preload="none"></video><span class="vtag">&#9654; VÍDEO</span></div>';}
+ else{html+='<div class="rcar-item"><img src="assets/img/'+it.i+'" loading="lazy" alt=""></div>';}
+});}
+document.getElementById('rcar').innerHTML=html;
+
+/* marquee em JS: anda sozinho, aceita arrastar e sempre retoma */
+var track=document.getElementById('rcar');
+var x=0,vel=0,px=0,dragging=false,lastT=null,resumeAt=0;
+var SPEED=50; /* px por segundo */
+function tick(t){
+ if(lastT===null)lastT=t;
+ var dt=Math.min((t-lastT)/1000,.1);lastT=t;
+ if(dragging){/* posição controlada pelo dedo */}
+ else if(Math.abs(vel)>5){x+=vel*dt;vel*=Math.pow(.0015,dt);} /* inércia do arrasto */
+ else if(t>=resumeAt){x+=SPEED*dt;}
+ var half=(track.scrollWidth+18)/2; /* +18 = gap entre as duas metades, pra emenda do loop ser exata */
+ if(half>0){x=((x%half)+half)%half;}
+ track.style.transform='translateX('+(-x)+'px)';
+ requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+track.addEventListener('pointerdown',function(e){
+ dragging=true;vel=0;px=e.clientX;track.classList.add('drag');
+ try{track.setPointerCapture(e.pointerId);}catch(err){}
+});
+track.addEventListener('pointermove',function(e){
+ if(!dragging)return;
+ var dx=e.clientX-px;px=e.clientX;
+ x-=dx;vel=-dx*60; /* velocidade estimada pra inércia */
+});
+function solta(){
+ if(!dragging)return;
+ dragging=false;track.classList.remove('drag');
+ resumeAt=performance.now()+600; /* retoma o passeio logo depois */
+}
+track.addEventListener('pointerup',solta);
+track.addEventListener('pointercancel',solta);
+track.addEventListener('lostpointercapture',solta);
+})();
+
+/* ---- DEPOIMENTOS ---- */
+(function(){
+var rev=[
+ {n:'mariana_arq',h:'Arquiteta',a:'mariana-arq',t:'Meu projeto chegou em outro patamar depois desse minicurso. O antes e depois não dá nem pra comparar.'},
+ {n:'carla.gp',h:'Designer de interiores',a:'carla-gp',t:'O Vibe Render foi maravilhoso. Achei que seria só mais um curso de IA, mas vendo o resultado nos meus projetos… melhor decisão que tomei.'},
+ {n:'paulolima.arch',h:'Arquiteto',a:'paulolima-arch',t:'Super atenção do Luiz do início ao fim. Um dos melhores conteúdos práticos de IA que já fiz.'},
+ {n:'felipe.loft',h:'Artista 3D',a:'felipe-loft',t:'Já consegui um resultado muito melhor aplicando no meu projeto. Antes eu só fazia umas imagens aleatórias. Agora tá virando trabalho real.'},
+ {n:'junior.gama',h:'Arquiteto',a:'junior-gama',t:'Consegui aplicar o efeito timelapse de dia pra noite exatamente como vocês ensinaram. Surreal.'}
+];
+var wa=[
+ {n:'Rafael F.',h:'+55 11 9****-1203',a:'rafael-f',t:'Cara, tô AMANDO o Vibe Render. Você tá mudando a forma de raciocínio de 3D do meu escritório inteiro.',time:'15:42'},
+ {n:'Juliana R.',h:'+55 41 9****-8821',a:'juliana-r',t:'Obrigada Luiz! O Vibe Render abriu minha mente, foi o primeiro que me mostrou o que é realmente possível com IA.',time:'09:41'},
+ {n:'Ana Paula',h:'+55 21 9****-4410',a:'ana-paula',t:'Já tinha feito outro curso de IA bem básico e me surpreendi demais com o conteúdo aqui. Tá em outro nível.',time:'20:17'},
+ {n:'Wendel T.',h:'+55 19 9****-5611',a:'wendel-t',t:'Parece muito real o que a gente tá fazendo aqui. Tô até agora tentando acreditar… tá pago! hehehe',time:'04:28'},
+ {n:'Mário R.',h:'+55 31 9****-9087',a:'mario-r',t:'Tô gostando muito do Vibe Render. Valeu a pena cada centavo. Aprendi muito em pouco tempo.',time:'11:14'}
+];
+function revCard(d){return '<div class="dep-card"><div class="dep-head-row"><div class="dep-avatar"><img src="assets/img/dep/'+d.a+'.webp" alt=""></div><div class="dep-meta"><div class="dep-name">'+d.n+'</div><div class="dep-handle">'+d.h+'</div><div class="dep-stars">★★★★★</div></div></div><div class="dep-text">'+d.t+'</div></div>';}
+function waCard(d){return '<div class="dep-card wa"><div class="dep-head-row"><div class="dep-avatar wa"><img src="assets/img/dep/'+d.a+'.webp" alt=""></div><div class="dep-meta"><div class="dep-name">'+d.n+'</div><div class="dep-handle">'+d.h+'</div></div></div><div class="dep-bubble">'+d.t+'<div class="dep-time">'+d.time+' <span class="ck">✓✓</span></div></div></div>';}
+var r1=[],r2=[];
+for(var i=0;i<5;i++){r1.push(revCard(rev[i]));r1.push(waCard(wa[i]));}
+for(var j=4;j>=0;j--){r2.push(waCard(wa[j]));r2.push(revCard(rev[j]));}
+document.getElementById('depRow1').innerHTML=r1.join('')+r1.join('');
+document.getElementById('depRow2').innerHTML=r2.join('')+r2.join('');
+})();
+
+/* ---- BEFORE/AFTER sliders ---- */
+function initBA(el){
+  var wrap=el.querySelector('.after-wrap'),handle=el.querySelector('.ba-handle'),drag=false;
+  function set(x){var r=el.getBoundingClientRect();var p=Math.max(0,Math.min(1,(x-r.left)/r.width));wrap.style.clipPath='inset(0 0 0 '+(p*100)+'%)';handle.style.left=(p*100)+'%';}
+  function down(e){drag=true;set((e.touches?e.touches[0].clientX:e.clientX));e.preventDefault();}
+  function move(e){if(!drag)return;set((e.touches?e.touches[0].clientX:e.clientX));}
+  function up(){drag=false;}
+  el.addEventListener('mousedown',down);el.addEventListener('touchstart',down,{passive:false});
+  window.addEventListener('mousemove',move);window.addEventListener('touchmove',move,{passive:false});
+  window.addEventListener('mouseup',up);window.addEventListener('touchend',up);
+}
+document.querySelectorAll('[data-ba]').forEach(initBA);
+
+/* ---- LAZY VIDEOS (play when visible) ---- */
+(function(){
+  var vo=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){if(!v.src&&v.dataset.src){v.src=v.dataset.src;v.load();}v.play().catch(()=>{});}else{v.pause();}});},{threshold:.25});
+  document.querySelectorAll('.lazyvid').forEach(v=>vo.observe(v));
+})();
+
+/* ---- FAQ ---- */
+document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{var i=q.parentElement,w=i.classList.contains('open');document.querySelectorAll('.faq-item').forEach(x=>x.classList.remove('open'));if(!w)i.classList.add('open');});});
+
+/* ---- REVEAL ---- */
+var obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.08,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
