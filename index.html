@@ -14,7 +14,7 @@ fbq('init','2428536680685666');fbq('track','PageView');
 <!-- End Meta Pixel Code -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Michroma&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -96,8 +96,8 @@ img,video{display:block;max-width:100%}
 /* HERO VISUAL — workflow timeline em destaque (mídias 4:5, sem crop) */
 .wf{display:flex;align-items:center;justify-content:center;width:100%;max-width:1000px;margin:6px auto 46px}
 .wf-step{position:relative;flex:1;aspect-ratio:4/5;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.18);background:#111}
-.wf-step.t1{transform:rotate(-2.5deg) translateY(12px)}
-.wf-step.t3{transform:rotate(2.5deg) translateY(12px)}
+.wf-step.t1{transform:rotate(-2.5deg) translateY(12px);z-index:1}
+.wf-step.t3{transform:rotate(2.5deg) translateY(12px);z-index:1}
 .wf-step.t2{transform:scale(1.07);z-index:2;box-shadow:0 34px 80px rgba(0,0,0,.26)}
 .wf-step img,.wf-step video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .wf-step::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,10,.6) 0%,transparent 38%)}
@@ -161,7 +161,7 @@ img,video{display:block;max-width:100%}
 .sol-media img,.sol-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .sol-body{padding:20px 22px 24px}
 .sol-body .t{font-family:var(--serif);font-size:17px;font-weight:700;color:#fff;margin-bottom:6px}
-.sol-body .d{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6}
+.sol-body .d{font-size:12.5px;color:rgba(255,255,255,.45);line-height:1.6;max-width:30ch;margin:0 auto;text-wrap:balance}
 
 /* PARA QUEM É — image cards */
 .persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
@@ -256,23 +256,23 @@ img,video{display:block;max-width:100%}
 
 /* RENDERLAB SECTION (brand identity) */
 .rl{background:#000;color:#ebebeb;padding:110px 0;position:relative;overflow:hidden}
-.rl::before{content:'';position:absolute;top:-120px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(204,255,0,.12),transparent 70%);pointer-events:none}
+.rl::before{content:'';position:absolute;top:-120px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(0,48,255,.18),transparent 70%);pointer-events:none}
 .rl-grid{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;position:relative;z-index:2}
-.rl-logo{display:inline-flex;align-items:center;border:2px solid rgba(255,255,255,.9);border-radius:14px;overflow:hidden;height:46px;margin-bottom:22px}
-.rl-logo .word{font-family:var(--mono);font-weight:700;font-size:21px;letter-spacing:1px;color:#fff;padding:0 14px 0 16px}
-.rl-logo .ia{background:#fff;color:#000;font-family:var(--mono);font-weight:700;font-size:21px;height:100%;display:flex;align-items:center;padding:0 14px;letter-spacing:1px}
+.rl-logo{display:inline-flex;align-items:center;border:2px solid rgba(255,255,255,.92);border-radius:13px;overflow:hidden;height:44px;margin-bottom:22px}
+.rl-logo .word{font-family:'Michroma',var(--mono);font-weight:400;font-size:16px;letter-spacing:2px;color:#fff;padding:0 14px 0 16px}
+.rl-logo .ia{background:#fff;color:#000;font-family:'Michroma',var(--mono);font-weight:400;font-size:16px;height:100%;display:flex;align-items:center;padding:0 12px;letter-spacing:1px;border-radius:9px 0 0 9px;margin-left:2px}
 .rl .sec-lbl{color:#7d92ff}
 .rl h2{font-family:var(--serif);font-size:clamp(26px,3.4vw,40px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;color:#fff}
 .rl p{font-size:15.5px;color:rgba(235,235,235,.62);line-height:1.75;margin-bottom:12px}
 .rl-feats{margin-top:22px;display:flex;flex-direction:column;gap:10px}
 .rl-feat{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:13px 16px}
-.rl-feat .ic{width:34px;height:34px;border-radius:9px;background:rgba(204,255,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rl-feat .ic{width:34px;height:34px;border-radius:9px;background:rgba(0,48,255,.16);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rl-feat .ic svg{width:18px;height:18px;stroke:#7d92ff}
 .rl-feat .t1{font-size:14px;font-weight:700;color:#fff}
 .rl-feat .t1 b{color:#d4f81a;font-family:var(--mono)}
 .rl-feat .t2{font-size:12px;color:rgba(235,235,235,.4)}
 /* mockup */
-.rl-mock{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0c0c0c;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 1px rgba(204,255,0,.06)}
+.rl-mock{border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0c0c0c;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 1px rgba(0,48,255,.12)}
 .rl-mock-bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:#111;border-bottom:1px solid rgba(255,255,255,.06)}
 .rl-mock-bar .d{width:9px;height:9px;border-radius:50%}
 .rl-mock-bar .d.r{background:#ff5f56}.rl-mock-bar .d.y{background:#ffbd2e}.rl-mock-bar .d.g{background:#27c93f}
