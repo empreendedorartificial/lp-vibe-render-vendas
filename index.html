@@ -186,6 +186,13 @@ img,video{display:block;max-width:100%}
 .mod-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--coral);margin-bottom:12px;letter-spacing:2px;text-transform:uppercase}
 .mod-ttl{font-family:var(--serif);font-size:25px;font-weight:900;margin-bottom:12px;letter-spacing:-.5px;line-height:1.15;color:#fff}
 .mod-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.up-ba{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+.up-ba-cell{position:relative;width:78px;height:104px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.14);flex-shrink:0}
+.up-ba-cell img{width:100%;height:100%;object-fit:cover;display:block}
+.up-ba-cell span{position:absolute;left:6px;bottom:6px;font-family:var(--mono);font-size:10px;font-weight:700;background:rgba(0,0,0,.62);color:#fff;padding:2px 7px;border-radius:5px;letter-spacing:.5px}
+.up-ba-cell span.hl{background:var(--coral)}
+.up-ba-arrow{color:var(--coral);font-size:24px;font-weight:700}
+.up-ba-cap{font-size:12.5px;color:var(--text3);max-width:130px;line-height:1.4}
 .mod-list li{font-size:14px;color:rgba(255,255,255,.6);display:flex;align-items:flex-start;gap:9px;line-height:1.45}
 .mod-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--coral);flex-shrink:0;margin-top:7px}
 
@@ -581,7 +588,7 @@ footer{padding:30px 0;border-top:1px solid var(--border);text-align:center;font-
 <div class="mod flip reveal">
 <div class="mod-media">
 <span class="mod-badge">Upscale 4K</span>
-<video class="lazyvid" data-src="assets/video/m04-upscale-ad.mp4" muted loop playsinline preload="none" poster="assets/img/poster-m04-upscale.jpg"></video>
+<video class="lazyvid" data-src="assets/video/m04-upscale-hq.mp4" muted loop playsinline preload="none" poster="assets/img/poster-m04-upscale.jpg"></video>
 </div>
 <div class="mod-body">
 <div class="mod-num">Módulo 04 &mdash; 2 aulas</div>
@@ -590,6 +597,12 @@ footer{padding:30px 0;border-top:1px solid var(--border);text-align:center;font-
 <li>De 2K para 4K com controle de HDR e nitidez</li>
 <li>Expanda limites com 17 ângulos de câmera</li>
 </ul>
+<div class="up-ba">
+<div class="up-ba-cell"><img src="assets/img/up-antes.jpg" alt="Antes em 2K"><span>2K</span></div>
+<span class="up-ba-arrow">&rarr;</span>
+<div class="up-ba-cell"><img src="assets/img/up-depois.jpg" alt="Depois em 4K"><span class="hl">4K</span></div>
+<span class="up-ba-cap">do 2K ao 4K, sem perder nitidez</span>
+</div>
 </div>
 </div>
 </div>
