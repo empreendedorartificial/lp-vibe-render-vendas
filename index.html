@@ -129,6 +129,7 @@ img,video{display:block;max-width:100%}
 .sec-dark .sec-lbl{color:var(--coral)}
 .sec-dark .sec-desc{color:rgba(255,255,255,.6)}
 .sec-light{padding:110px 0}
+#faq{padding-bottom:48px}
 .sec-lbl{font-size:11px;font-weight:700;color:var(--coral);text-transform:uppercase;letter-spacing:3px;margin-bottom:14px}
 .sec-ttl{font-family:var(--serif);font-size:clamp(28px,4vw,46px);font-weight:900;line-height:1.1;margin-bottom:16px;letter-spacing:-2px}
 .sec-desc{font-size:17px;color:var(--text2);max-width:560px;line-height:1.7}
@@ -328,7 +329,19 @@ img,video{display:block;max-width:100%}
 .faq-item.open .arr{transform:rotate(180deg)}
 
 /* FINAL */
-.final{padding:110px 0;text-align:center}
+.final{padding:64px 0 100px;text-align:center}
+/* suporte humano (WhatsApp) */
+.suporte{padding:0 0 8px}
+.suporte-card{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:20px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:22px 26px;box-shadow:0 14px 40px rgba(22,19,15,.05)}
+.suporte-ic{width:54px;height:54px;border-radius:14px;background:#25d36618;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.suporte-ic svg{width:30px;height:30px;fill:#25d366}
+.suporte-tx{flex:1;min-width:0}
+.suporte-tx h4{font-family:var(--serif);font-size:19px;font-weight:900;letter-spacing:-.4px;color:var(--dark);margin-bottom:3px}
+.suporte-tx p{font-size:14px;color:var(--text2);line-height:1.5}
+.suporte-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:9px;background:#25d366;color:#fff;font-weight:800;font-size:14.5px;padding:14px 22px;border-radius:11px;transition:all .25s;box-shadow:0 8px 22px rgba(37,211,102,.3)}
+.suporte-btn:hover{background:#1eb858;transform:translateY(-2px)}
+.suporte-btn svg{width:19px;height:19px;fill:#fff}
+@media(max-width:640px){.suporte-card{flex-direction:column;text-align:center;gap:14px}.suporte-btn{width:100%;justify-content:center}}
 .final h2{font-family:var(--serif);font-size:clamp(28px,4.5vw,50px);font-weight:900;margin-bottom:18px;letter-spacing:-2px}
 .final h2 em{font-style:italic;color:var(--coral)}
 .final p{font-size:17px;color:var(--text2);margin-bottom:32px}
@@ -818,6 +831,20 @@ Garantia incondicional de 7 dias &bull; Acesso vitalício
 <div class="faq-item"><div class="faq-q">Qual a diferença para a Formação Render.IA? <span class="arr">&#9660;</span></div><div class="faq-a">O Vibe Render é focado em resultados rápidos: 2 horas, 23 aulas, uma única ferramenta. A Formação é mais completa: 70+ aulas, 15+ ferramentas, mentorias ao vivo quinzenais, comunidade exclusiva e agentes GPT. Se quer começar rápido, Vibe Render. Se quer domínio total, Formação.</div></div>
 <div class="faq-item"><div class="faq-q">E se eu travar em alguma aula? <span class="arr">&#9660;</span></div><div class="faq-a">As aulas são curtas e direto ao ponto, e ficam disponíveis no seu acesso vitalício para rever quantas vezes quiser. Como tudo é feito clique a clique dentro de uma única ferramenta, é difícil travar — e qualquer aula pode ser revista no ritmo que você precisar.</div></div>
 <div class="faq-item"><div class="faq-q">E se eu não gostar? <span class="arr">&#9660;</span></div><div class="faq-a">Garantia incondicional de 7 dias. Se não valeu, devolvemos 100% do valor. Sem perguntas, sem burocracia. O risco é todo nosso.</div></div>
+</div>
+</div>
+</section>
+
+<!-- SUPORTE HUMANO (WhatsApp) -->
+<section class="suporte">
+<div class="ctn">
+<div class="suporte-card reveal">
+<div class="suporte-ic"><svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.27-1.38c1.45.79 3.08 1.21 4.74 1.21h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 1.67c2.2 0 4.27.86 5.82 2.41a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.05-.2-.31a8.2 8.2 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.24-8.23zm4.52 9.97c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.48-1.38-1.73-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg></div>
+<div class="suporte-tx">
+<h4>Ainda com alguma dúvida?</h4>
+<p>Fale com o nosso time de suporte — gente de verdade, pronta pra te ajudar a decidir.</p>
+</div>
+<a href="https://wa.me/5544997234024?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20Vibe%20Render%20antes%20de%20comprar." target="_blank" rel="noopener" class="suporte-btn"><svg viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.27-1.38c1.45.79 3.08 1.21 4.74 1.21h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z"/></svg> Falar no WhatsApp</a>
 </div>
 </div>
 </section>
