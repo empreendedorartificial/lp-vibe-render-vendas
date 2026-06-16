@@ -252,9 +252,15 @@ img,video{display:block;max-width:100%}
 .aula-bar{display:flex;align-items:center;gap:6px;padding:11px 14px;background:rgba(255,255,255,.05)}
 .aula-bar .d{width:8px;height:8px;border-radius:50%}.aula-bar .d.r{background:#ff5f56}.aula-bar .d.y{background:#ffbd2e}.aula-bar .d.g{background:#27c93f}
 .aula-bar .t{margin-left:8px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.4);text-transform:uppercase}
-.aula-slot{background:#0e0e10}
+.aula-slot{position:relative;background:#0e0e10}
 .aula-slot iframe{width:100%;aspect-ratio:16/9;display:block;border:0}
 .aula-slot video{width:100%;display:block;background:#000}
+.aula-play{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:rgba(8,8,10,.34);border:none;cursor:pointer;transition:opacity .3s;z-index:3}
+.aula-play.hide{opacity:0;pointer-events:none}
+.aula-play-btn{width:90px;height:90px;border-radius:50%;background:var(--coral);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 44px rgba(232,85,61,.5);animation:aulapulse 1.8s ease-in-out infinite}
+.aula-play-btn svg{width:34px;height:34px;margin-left:6px;fill:#fff}
+.aula-play-txt{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:1.2px;color:#fff;text-transform:uppercase;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+@keyframes aulapulse{0%,100%{transform:scale(1);box-shadow:0 12px 44px rgba(232,85,61,.5)}50%{transform:scale(1.08);box-shadow:0 16px 58px rgba(232,85,61,.72)}}
 .aula-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:26px}
 .aula-pill{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:100px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text2)}
 .aula-pill::before{content:'\2713';color:var(--coral);font-weight:800}
@@ -707,6 +713,10 @@ footer{padding:30px 0;border-top:1px solid var(--border);text-align:center;font-
 <div class="aula-bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="t">Aula &bull; Print to Render em residenciais</span></div>
 <div class="aula-slot" id="aulaEmbed">
 <video id="aulaVideo" src="assets/video/aula-print-render.mp4" controls preload="metadata" playsinline poster="assets/img/aula-poster.jpg"></video>
+<button class="aula-play" id="aulaPlay" type="button" aria-label="Assistir a aula">
+<span class="aula-play-btn"><svg viewBox="0 0 24 24"><polygon points="8,5 20,12 8,19"/></svg></span>
+<span class="aula-play-txt">Assista a aula &bull; 8 min</span>
+</button>
 </div>
 </div>
 <div class="aula-pills reveal">
@@ -982,6 +992,15 @@ document.querySelectorAll('[data-ba]').forEach(initBA);
 (function(){
   var vo=new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){if(!v.src&&v.dataset.src){v.src=v.dataset.src;v.load();}v.play().catch(()=>{});}else{v.pause();}});},{threshold:.25});
   document.querySelectorAll('.lazyvid').forEach(v=>vo.observe(v));
+})();
+
+/* ---- Aula: botão de play estilo VTurb ---- */
+(function(){
+  var v=document.getElementById('aulaVideo'),b=document.getElementById('aulaPlay');
+  if(!v||!b)return;
+  b.addEventListener('click',function(){v.play();});
+  v.addEventListener('play',function(){b.classList.add('hide');});
+  v.addEventListener('ended',function(){b.classList.remove('hide');v.load();});
 })();
 
 /* ---- FAQ ---- */
