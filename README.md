@@ -10,7 +10,7 @@ Página de vendas do minicurso Vibe Render (Academy). HTML único + assets, depl
 ## Pontos editáveis frequentes
 - **Data da barra do topo**: gerada automática via JS (dia vigente). Não precisa editar.
 - **Preços**: oferta em `R$ 197` à vista, ancoragem `R$ 497`, `12x de R$ 19,43`. Ficam na barra do topo, na seção de oferta e na barra fixa mobile.
-- **Link de checkout** (todos os botões de compra): `https://pay.hotmart.com/E105428912P?bid=1781234090340`
+- **Link de checkout** (todos os botões de compra): `https://pay.hotmart.com/E105428912P?checkoutMode=10`
 - **Pixel Meta**: `2428536680685666` (PageView) no `<head>`.
 - **Aula liberada**: player VTurb `vid-6a2b930d7f684d974fa50130` dentro de `#aulaEmbed` (seção pós-depoimentos).
 
