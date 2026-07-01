@@ -5,3 +5,10 @@ _tools/
 _draft_package/
 _materiais/
 base_v3.html
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
