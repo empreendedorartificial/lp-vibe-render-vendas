@@ -1,0 +1,8 @@
+# Cloudflare Workers (Static Assets) — deploy via `npx wrangler deploy`
+# ⚠️ NÃO é git-connected: push NÃO publica. Worker: lp-vibe-render-vendas
+# Domínio: viberender.montani3d.com.br (custom domain do worker)
+name = "lp-vibe-render-vendas"
+compatibility_date = "2026-06-25"
+
+[assets]
+directory = "."

@@ -1,0 +1,14 @@
+.git
+.gitignore
+.wrangler
+.impeccable
+.assetsignore
+.DS_Store
+node_modules
+_work
+_tools
+_draft_package
+_materiais
+base_v3.html
+README.md
+wrangler.toml
