@@ -401,6 +401,32 @@ footer{padding:30px 0;border-top:1px solid var(--border);text-align:center;font-
 </style>
 </head>
 <body>
+<script>
+// Atribuição venda↔criativo: captura utm_*/src/sck da URL (persiste na sessão) e
+// repassa pra TODOS os links de checkout Hotmart como src (criativo) + sck (cadeia completa).
+(function(){
+  var s={}; try{s=JSON.parse(sessionStorage.getItem('mnt_utm')||'{}')}catch(e){}
+  var q=new URLSearchParams(location.search);
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck'].forEach(function(k){
+    var v=q.get(k); if(v)s[k]=v.slice(0,100);
+  });
+  try{sessionStorage.setItem('mnt_utm',JSON.stringify(s))}catch(e){}
+  function aplica(){
+    var src=s.src||s.utm_term||s.utm_content||s.utm_campaign;
+    var sck=s.sck||[s.utm_campaign,s.utm_content,s.utm_term].filter(Boolean).join('|');
+    if(!src&&!sck)return;
+    document.querySelectorAll('a[href*="pay.hotmart.com"]').forEach(function(a){
+      try{
+        var u=new URL(a.href);
+        if(src)u.searchParams.set('src',src);
+        if(sck)u.searchParams.set('sck',sck.slice(0,120));
+        a.href=u.toString();
+      }catch(e){}
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',aplica);else aplica();
+})();
+</script>
 
 <!-- TOPBAR -->
 <div class="topbar">
