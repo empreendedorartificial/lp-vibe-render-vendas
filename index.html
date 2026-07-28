@@ -412,30 +412,123 @@ footer{padding:30px 0;border-top:1px solid var(--border);text-align:center;font-
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TRBNRTQN"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
+<!-- ================================================================= -->
+<!-- RASTRO MONTANI — versão 2026-07-27                                -->
+<!--                                                                    -->
+<!-- Fonte da verdade deste bloco: landing-pages/_rastro/snippet.html    -->
+<!-- Copie INTEIRO, trocando só a constante PFX pelo prefixo da página.  -->
+<!--                                                                    -->
+<!-- O que ele faz, em ordem:                                           -->
+<!--  1. lê o anúncio da URL — utm_term ({{ad.name}}) tem PRIORIDADE     -->
+<!--     sobre utm_content ({{adset.name}}); o contrário faz o rastro    -->
+<!--     parar no conjunto e o painel nunca ver o criativo (bug 22/07).  -->
+<!--  2. guarda em localStorage por 30 dias: o clique e a compra podem   -->
+<!--     acontecer em visitas diferentes (sessionStorage perdia isso).   -->
+<!--  3. mantém um visitor_id próprio (1 ano) — base do multi-toque.     -->
+<!--  4. registra o toque no D1 (não bloqueia nada; falha em silêncio).  -->
+<!--  5. carimba TODO link de checkout da página com <PFX>--<anúncio>:   -->
+<!--     Stripe → client_reference_id · Hotmart → src + sck.             -->
+<!--                                                                    -->
+<!-- Regras que este bloco NUNCA pode quebrar:                           -->
+<!--  · nada aqui pode impedir a página de carregar ou o botão de vender -->
+<!--    (por isso: try/catch em tudo, zero dependência externa)          -->
+<!--  · é inline de propósito — script externo pode ser bloqueado por    -->
+<!--    adblock e derrubar o rastreamento inteiro (lição da página de    -->
+<!--    criativos)                                                       -->
+<!-- ================================================================= -->
 <script>
-// Atribuição venda↔criativo: captura utm_*/src/sck da URL (persiste na sessão) e
-// repassa pra TODOS os links de checkout Hotmart como src (criativo) + sck (cadeia completa).
-(function(){
-  var s={}; try{s=JSON.parse(sessionStorage.getItem('mnt_utm')||'{}')}catch(e){}
-  var q=new URLSearchParams(location.search);
-  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','sck'].forEach(function(k){
-    var v=q.get(k); if(v)s[k]=v.slice(0,100);
-  });
-  try{sessionStorage.setItem('mnt_utm',JSON.stringify(s))}catch(e){}
-  function aplica(){
-    var src=s.src||s.utm_term||s.utm_content||s.utm_campaign;
-    var sck=s.sck||[s.utm_campaign,s.utm_content,s.utm_term].filter(Boolean).join('|');
-    if(!src&&!sck)return;
-    document.querySelectorAll('a[href*="pay.hotmart.com"]').forEach(function(a){
-      try{
-        var u=new URL(a.href);
-        if(src)u.searchParams.set('src',src);
-        if(sck)u.searchParams.set('sck',sck.slice(0,120));
-        a.href=u.toString();
-      }catch(e){}
-    });
+(function () {
+  "use strict";
+  var PFX = "vibe";                        // Vibe Render — vendas
+  var API = "https://financeiro-sync.montanistudio3d.workers.dev";
+  var DIAS = 30;
+
+  function ler(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function grava(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function uuid() {
+    try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return "v-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',aplica);else aplica();
+
+  // ---- 1. visitante persistente (1 ano) ----
+  var vid = ler("mnt_vid");
+  if (!vid) { vid = uuid(); grava("mnt_vid", vid); }
+  try { document.cookie = "mnt_vid=" + vid + ";path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
+
+  // ---- 2. origem: URL agora, ou a última guardada (janela de 30 dias) ----
+  var qs, ad = "", adId = "", conj = "", camp = "";
+  try { qs = new URLSearchParams(location.search); } catch (e) { qs = null; }
+  if (qs) {
+    ad = qs.get("utm_term") || qs.get("utm_content") || "";     // ANÚNCIO primeiro
+    conj = qs.get("utm_content") || "";
+    camp = qs.get("utm_campaign") || "";
+    adId = qs.get("ad_id") || qs.get("utm_id") || "";
+  }
+  var agora = Date.now();
+  if (ad) {
+    grava("mnt_org", JSON.stringify({ ad: ad, adId: adId, conj: conj, camp: camp, t: agora }));
+  } else {
+    try {
+      var s = JSON.parse(ler("mnt_org") || "null");
+      if (s && agora - (s.t || 0) < DIAS * 864e5) { ad = s.ad || ""; adId = s.adId || ""; conj = s.conj || ""; camp = s.camp || ""; }
+    } catch (e) {}
+  }
+
+  // ---- 3. rastro que vai no checkout ----
+  function limpa(v) {
+    return String(v || "").toLowerCase()
+      .replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 52);
+  }
+  // o id do anúncio é mais confiável que o nome (nome muda, id não)
+  var valor = limpa(adId || ad);
+  var RASTRO = (valor ? PFX + "--" + valor : PFX + "-organico").slice(0, 60);
+
+  // ---- 4. registra o toque (multi-toque; nunca bloqueia a página) ----
+  try {
+    if (ad || adId) {
+      fetch(API + "/toque", {
+        method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
+        body: JSON.stringify({
+          v: vid, p: location.pathname.slice(0, 120), pfx: PFX,
+          ad: ad.slice(0, 120), ad_id: adId.slice(0, 40),
+          conj: conj.slice(0, 120), camp: camp.slice(0, 120),
+          ref: (document.referrer || "").slice(0, 160),
+        }),
+      }).catch(function () {});
+    }
+  } catch (e) {}
+
+  // ---- 5. carimba os links de checkout ----
+  function carimbar(a) {
+    try {
+      var h = a.getAttribute("href") || "";
+      if (!/^https?:/i.test(h)) return;
+      var u = new URL(h);
+      var host = u.hostname;
+      if (/stripe\.com$/.test(host) || /buy\.stripe\.com/.test(host)) {
+        if (!u.searchParams.get("client_reference_id")) u.searchParams.set("client_reference_id", RASTRO);
+      } else if (/hotmart\.com$/.test(host) || /pay\.hotmart\.com/.test(host)) {
+        if (!u.searchParams.get("src")) u.searchParams.set("src", RASTRO);
+        if (!u.searchParams.get("sck")) u.searchParams.set("sck", RASTRO);
+      } else { return; }
+      a.setAttribute("href", u.toString());
+    } catch (e) {}
+  }
+  function varrer() { try { [].forEach.call(document.querySelectorAll("a[href]"), carimbar); } catch (e) {} }
+
+  varrer();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", varrer);
+  // páginas que montam CTA depois (carrossel, modal, conteúdo dinâmico)
+  try {
+    new MutationObserver(function () { varrer(); })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+  // e no clique, por garantia — pega link criado no último instante
+  document.addEventListener("click", function (e) {
+    try { var a = e.target && e.target.closest && e.target.closest("a[href]"); if (a) carimbar(a); } catch (x) {}
+  }, true);
+
+  window.__mntRastro = { visitor: vid, rastro: RASTRO, ad: ad, ad_id: adId, conj: conj, camp: camp };
 })();
 </script>
 
